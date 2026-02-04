@@ -1,0 +1,31 @@
+{
+  "name": "freshdeals-frontend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "@vueuse/core": "^10.7.0",
+    "@vueuse/firebase": "^10.7.0",
+    "axios": "^1.6.1",
+    "firebase": "^10.0.0",
+    "pinia": "^2.1.6",
+    "uuid": "^13.0.0",
+    "vite-plugin-pwa": "^1.2.0",
+    "vue": "^3.3.4",
+    "vue-i18n": "^9.8.0",
+    "vue-router": "^4.2.5",
+    "vuetify": "^3.3.24"
+  },
+  "devDependencies": {
+    "@mdi/js": "^7.4.47",
+    "@vitejs/plugin-vue": "^4.5.0",
+    "sass": "^1.69.5",
+    "vite": "^5.0.7"
+  }
+}

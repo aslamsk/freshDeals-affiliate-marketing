@@ -1,0 +1,115 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // DEALS COLLECTION - PUBLIC READ/WRITE
+    // ==========================================
+    match /deals/{dealId} {
+      // Anyone can READ/WRITE deals
+      allow read: if true;
+      allow write: if true;
+      
+      // Track clicks (frontend can increment)
+      allow update: if request.resource.data.clicks == resource.data.clicks + 1 &&
+                       request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(['clicks', 'lastClicked']);
+    }
+
+    // ==========================================
+    // PRODUCTS COLLECTION - PUBLIC READ/WRITE
+    // ==========================================
+    match /products/{productId} {
+      // Anyone can READ/WRITE products
+      allow read: if true;
+      allow write: if true;
+      
+      // Platform prices subcollection
+      match /platformPrices/{priceId} {
+        allow read: if true;
+        allow write: if true;
+      }
+    }
+
+    // ==========================================
+    // PLATFORM LINKS COLLECTION - PUBLIC READ/WRITE
+    // ==========================================
+    match /platformLinks/{linkId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // COUPONS COLLECTION - PUBLIC READ/WRITE
+    // ==========================================
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // PUSH NOTIFICATIONS - PUBLIC READ/WRITE
+    // ==========================================
+    match /push_notifications/{notificationId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // PUSH LOGS - PUBLIC READ/WRITE
+    // ==========================================
+    match /push_logs/{logId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // ANALYTICS EVENTS - PUBLIC WRITE/READ
+    // ==========================================
+    match /analytics_events/{eventId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+
+    // ==========================================
+    // PRICES COLLECTION - PUBLIC READ/WRITE
+    // ==========================================
+    match /prices/{priceId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // PRICE HISTORY - PUBLIC READ/WRITE
+    // ==========================================
+    match /priceHistory/{historyId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // SETTINGS - PUBLIC READ/WRITE
+    // ==========================================
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // ==========================================
+    // USERS - PUBLIC READ/WRITE
+    // ==========================================
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

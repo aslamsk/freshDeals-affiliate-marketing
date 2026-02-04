@@ -1,0 +1,50 @@
+.
+├── public/
+│   ├── index.html
+│   ├── favicon.ico
+│   ├── manifest.json
+│   └── img/icons/
+│       ├── icon-192x192.png
+│       └── icon-512x512.png
+├── src/
+│   ├── assets/
+│   ├── components/
+│   │   ├── Header.vue
+│   │   ├── Footer.vue
+│   │   ├── DealCard.vue
+│   │   ├── PWAInstallPrompt.vue
+│   │   └── admin/
+│   │       ├── AdminProductPanel.vue
+│   │       ├── AdminDealPanel.vue
+│   │       ├── AdminCouponPanel.vue
+│   │       └── AdminSettingsPanel.vue
+│   ├── pages/
+│   │   ├── TodayDealsPage.vue
+│   │   ├── CategoryDealsPage.vue
+│   │   ├── ProductDetailPage.vue
+│   │   ├── AdminDashboard.vue
+│   │   └── NotFoundPage.vue
+│   ├── router/
+│   │   └── index.js
+│   ├── services/
+│   │   ├── adminService.js
+│   │   └── notificationService.js
+│   ├── stores/
+│   │   ├── dealsStore.js
+│   │   └── i18nStore.js
+│   ├── i18n/
+│   │   ├── index.js
+│   │   └── locales/
+│   │       ├── en.json
+│   │       └── te.json
+│   ├── plugins/
+│   │   └── vuetify.js
+│   ├── utils/
+│   ├── App.vue
+│   ├── main.js
+│   └── main.css
+├── .env.example
+├── vite.config.js
+├── tsconfig.json
+├── package.json
+└── README.md
