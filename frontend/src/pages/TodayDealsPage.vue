@@ -499,7 +499,8 @@ onMounted(() => {
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+  background: rgb(var(--v-theme-background));
+  color: rgb(var(--v-theme-on-surface));
 }
 
 /* Hero Section */
@@ -573,7 +574,7 @@ onMounted(() => {
 
 /* Filter Bar */
 .filter-bar {
-  background: white;
+  background: rgb(var(--v-theme-surface));
   border: 1px solid rgba(0,0,0,0.05);
 }
 
@@ -606,13 +607,13 @@ onMounted(() => {
 .section-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a2e;
+  color: rgb(var(--v-theme-on-surface));
   margin: 0;
 }
 
 .section-subtitle {
   font-size: 0.875rem;
-  color: #6c757d;
+  color: rgba(var(--v-theme-on-surface), 0.7);
   margin: 0;
 }
 

@@ -66,8 +66,8 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'FreshDeals';
   const options = {
     body: data.body || 'Check out our latest deals!',
-    icon: '/img/icons/icon-192x192.png',
-    badge: '/img/icons/icon-192x192.png',
+    icon: '/icon.svg',
+    badge: '/icon.svg',
   };
 
   event.waitUntil(self.registration.showNotification(title, options));

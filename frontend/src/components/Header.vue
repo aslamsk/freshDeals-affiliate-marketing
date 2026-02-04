@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <v-app-bar app color="primary" dark elevation="4" :height="isMobile ? 56 : 72">
     <!-- Mobile Menu Button - Always visible on mobile -->
     <template v-if="isMobile">
@@ -54,25 +54,8 @@
 
     <!-- Action Buttons -->
     <div class="d-flex align-center">
-      <!-- Language Toggle - Hidden on mobile -->
-      <v-menu v-if="!isMobile">
-        <template v-slot:activator="{ props }">
-          <v-btn icon v-bind="props" size="small">
-            <v-icon>mdi-translate</v-icon>
-          </v-btn>
-        </template>
-        <v-list density="compact">
-          <v-list-item @click="setLanguage('en')">
-            <template v-slot:prepend>
-              <v-icon size="small">mdi-check</v-icon>
-            </template>
-            <v-list-item-title>English</v-list-item-title>
-          </v-list-item>
-          <v-list-item @click="setLanguage('te')">
-            <v-list-item-title>తెలుగు</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
+      <!-- GTranslate Widget -->
+      <GTranslateWidget class="gtranslate-header d-none d-sm-flex" />
 
       <!-- Notifications Icon - Hidden on mobile -->
       <v-btn v-if="!isMobile" icon @click="toggleNotifications" size="small">
@@ -81,8 +64,13 @@
         </v-badge>
       </v-btn>
 
+      <!-- Theme Toggle (Desktop only) -->
+      <v-btn v-if="!isMobile" icon @click="toggleTheme" size="small" :aria-label="isDark ? 'Switch to light theme' : 'Switch to dark theme'">
+        <v-icon>{{ isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
+      </v-btn>
+
       <!-- Admin Link - Hidden on mobile -->
-      <v-btn v-if="!isMobile" icon to="/admin" size="small">
+      <v-btn v-if="!isMobile && isAdminLoggedIn" icon :to="adminLink" size="small">
         <v-icon>mdi-cog</v-icon>
       </v-btn>
     </div>
@@ -163,8 +151,19 @@
           <v-switch v-model="notificationsEnabled" hide-details density="compact" color="primary" />
         </template>
       </v-list-item>
+
+      <v-list-item rounded="lg">
+        <GTranslateWidget class="gtranslate-header-mobile" />
+      </v-list-item>
+
+      <v-list-item @click="toggleTheme" prepend-icon="mdi-theme-light-dark" rounded="lg">
+        <v-list-item-title>Theme</v-list-item-title>
+        <template v-slot:append>
+          <v-switch :model-value="isDark" hide-details density="compact" color="primary" />
+        </template>
+      </v-list-item>
       
-      <v-list-item to="/admin" @click="drawer = false" prepend-icon="mdi-cog" rounded="lg">
+      <v-list-item v-if="isAdminLoggedIn" :to="adminLink" @click="drawer = false" prepend-icon="mdi-cog" rounded="lg">
         <v-list-item-title>{{ $t('admin.dashboard') }}</v-list-item-title>
       </v-list-item>
     </v-list>
@@ -172,33 +171,38 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useDisplay } from 'vuetify';
-import { useI18nStore } from '../stores/i18nStore';
+import { useDisplay, useTheme } from 'vuetify';
 import { requestNotificationPermission } from '../services/notificationService';
+import adminAuthService from '../services/adminAuthService';
 import SearchBar from './SearchBar.vue';
+import GTranslateWidget from './GTranslateWidget.vue';
 
 const router = useRouter();
 const { mobile } = useDisplay();
-const i18nStore = useI18nStore();
+const theme = useTheme();
 
 const drawer = ref(false);
 const showMobileSearch = ref(false);
 const mobileSearchQuery = ref('');
 const notificationsEnabled = ref(false);
 const unreadCount = ref(0);
+const isAdminLoggedIn = ref(false);
 
 const isMobile = computed(() => mobile.value);
-
-const setLanguage = (lang) => {
-  i18nStore.setLocale(lang);
-  drawer.value = false;
-};
+const adminLink = computed(() => (isAdminLoggedIn.value ? '/admin/dashboard' : '/admin/login'));
+const isDark = computed(() => theme.global.name.value === 'dark');
 
 const toggleNotifications = async () => {
   const allowed = await requestNotificationPermission();
   notificationsEnabled.value = allowed;
+};
+
+const toggleTheme = () => {
+  const next = isDark.value ? 'light' : 'dark';
+  theme.global.name.value = next;
+  localStorage.setItem('theme', next);
 };
 
 const performMobileSearch = () => {
@@ -208,6 +212,30 @@ const performMobileSearch = () => {
     mobileSearchQuery.value = '';
   }
 };
+
+const refreshAdminState = async () => {
+  try {
+    const admin = await adminAuthService.getCurrentAdmin();
+    isAdminLoggedIn.value = !!admin;
+  } catch {
+    isAdminLoggedIn.value = false;
+  }
+};
+
+const handleStorage = (event) => {
+  if (event.key === 'admin_token' || event.key === 'admin_user') {
+    refreshAdminState();
+  }
+};
+
+onMounted(() => {
+  refreshAdminState();
+  window.addEventListener('storage', handleStorage);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorage);
+});
 </script>
 
 <style scoped>
@@ -226,6 +254,16 @@ const performMobileSearch = () => {
   left: 0;
   right: 0;
   z-index: 1000;
+}
+
+.gtranslate-header :deep(.gtranslate_wrapper) {
+  display: inline-flex;
+  align-items: center;
+}
+
+.gtranslate-header-mobile :deep(.gtranslate_wrapper) {
+  display: inline-flex;
+  align-items: center;
 }
 
 @media (max-width: 600px) {

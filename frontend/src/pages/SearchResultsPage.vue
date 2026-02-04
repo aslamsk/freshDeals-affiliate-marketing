@@ -5,7 +5,7 @@
       <v-row class="mb-4">
         <v-col cols="12">
           <v-card class="pa-4">
-            <v-row align="center" class="g-2">
+            <v-row align="center" class="gap-2">
               <v-col cols="12" md="6">
                 <h1 class="text-h5">{{ $t('search.results') }}</h1>
                 <p class="text-subtitle-2 text-grey">
@@ -33,7 +33,7 @@
       <v-row v-else-if="filteredResults.length > 0" class="mt-4">
         <!-- Deals Results -->
         <v-col cols="12" v-if="dealsResults.length > 0">
-          <h2 class="text-h6 mb-3">{{ $t('search.deals') }} ({{ dealsResults.length }})</h2>
+          <h2 class="text-h6 mb-3">{{ $t('search.deals') }} ({{ totalDealsCount }})</h2>
         </v-col>
         <v-col
           v-for="deal in dealsResults"
@@ -48,7 +48,7 @@
 
         <!-- Products Results -->
         <v-col cols="12" v-if="productsResults.length > 0">
-          <h2 class="text-h6 mb-3">{{ $t('search.products') }} ({{ productsResults.length }})</h2>
+          <h2 class="text-h6 mb-3">{{ $t('search.products') }} ({{ totalProductsCount }})</h2>
         </v-col>
         <v-col
           v-for="product in productsResults"
@@ -58,25 +58,7 @@
           md="4"
           lg="3"
         >
-          <v-card class="ma-2 h-100 d-flex flex-column">
-            <v-img :src="product.image || '/placeholder.png'" height="200" cover></v-img>
-            <v-card-title class="text-h6">
-              {{ product.title_en || product.title_te || 'Product' }}
-            </v-card-title>
-            <v-card-text class="flex-grow-1">
-              <p class="text-caption mb-2" v-if="product.description">
-                {{ product.description.substring(0, 100) }}...
-              </p>
-              <v-chip color="success" text-color="white" small>
-                {{ product.category || 'category' }}
-              </v-chip>
-            </v-card-text>
-            <v-card-actions>
-              <v-btn color="primary" block :to="`/product/${product.id}`">
-                {{ $t('common.viewDeal') }} →
-              </v-btn>
-            </v-card-actions>
-          </v-card>
+          <ProductCard :product="product" />
         </v-col>
       </v-row>
 
@@ -127,6 +109,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import firebaseDealsService from '../services/firebaseDealsService';
 import DealCard from '../components/DealCard.vue';
+import ProductCard from '../components/ProductCard.vue';
 import FilterPanel from '../components/FilterPanel.vue';
 
 const route = useRoute();
@@ -146,11 +129,11 @@ const activeFilters = ref({
 });
 
 const dealsResults = computed(() => {
-  return filteredResults.value.filter(r => r.type === 'deal').map(r => r.data);
+  return paginatedResults.value.filter(r => r.type === 'deal').map(r => r.data);
 });
 
 const productsResults = computed(() => {
-  return filteredResults.value.filter(r => r.type === 'product').map(r => r.data);
+  return paginatedResults.value.filter(r => r.type === 'product').map(r => r.data);
 });
 
 const filteredResults = computed(() => {
@@ -220,6 +203,8 @@ const paginatedResults = computed(() => {
 });
 
 const resultCount = computed(() => filteredResults.value.length);
+const totalDealsCount = computed(() => filteredResults.value.filter(r => r.type === 'deal').length);
+const totalProductsCount = computed(() => filteredResults.value.filter(r => r.type === 'product').length);
 const totalPages = computed(() => Math.ceil(filteredResults.value.length / resultsPerPage));
 
 const handleFiltersChanged = (filters) => {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <v-footer class="footer bg-dark text-white" app>
     <v-container>
       <v-row class="py-8">

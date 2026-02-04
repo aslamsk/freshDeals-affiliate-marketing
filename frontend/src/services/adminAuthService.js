@@ -3,13 +3,15 @@
  * Handles admin authentication, roles, and permissions
  */
 
-import { 
-  getAuth, 
+import {
+  getAuth,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  createUserWithEmailAndPassword,
+  updateProfile
 } from 'firebase/auth';
 import { 
   doc, 
@@ -17,13 +19,30 @@ import {
   setDoc,
   collection,
   query,
-  where,
-  getDocs
+  getDocs,
+  limit,
+  serverTimestamp
 } from 'firebase/firestore';
-import { db } from './firebaseConfig';
+import { initializeApp, getApps } from 'firebase/app';
+import { db, firebaseConfig, getFirebaseApp } from './firebaseConfig';
 
 // Initialize Auth
-const auth = getAuth();
+const auth = getAuth(getFirebaseApp());
+
+const DEFAULT_SUPER_ADMIN = {
+  email: 'admin.freshdeals@gmail.com',
+  password: 'Temp$8282',
+  username: 'admin',
+  profileName: 'Super Admin',
+  role: 'super_admin',
+  status: 'active'
+};
+
+const getSecondaryApp = () => {
+  const existing = getApps().find((appInstance) => appInstance.name === 'admin-bootstrap');
+  if (existing) return existing;
+  return initializeApp(firebaseConfig, 'admin-bootstrap');
+};
 
 // Set persistence
 setPersistence(auth, browserLocalPersistence).catch(err => {
@@ -63,14 +82,28 @@ export const adminLogin = async (email, password) => {
       ipAddress: 'tracking-ready'
     });
 
-    return {
+    const token = await user.getIdToken();
+    const admin = {
       uid: user.uid,
       email: user.email,
       ...adminData
     };
+
+    // Cache for quick access
+    localStorage.setItem('admin_token', token);
+    localStorage.setItem('admin_user', JSON.stringify(admin));
+
+    return {
+      success: true,
+      admin,
+      token
+    };
   } catch (error) {
     console.error('❌ Admin login failed:', error.message);
-    throw new Error(error.message || 'Login failed');
+    return {
+      success: false,
+      error: error.message || 'Login failed'
+    };
   }
 };
 
@@ -85,6 +118,8 @@ export const adminLogout = async (adminId) => {
     });
 
     await signOut(auth);
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_user');
     return true;
   } catch (error) {
     console.error('❌ Logout failed:', error);
@@ -136,10 +171,10 @@ export const hasPermission = async (adminId, permission) => {
     
     // Define permissions by role
     const permissions = {
-      'super_admin': ['all'],
-      'admin': ['deals', 'products', 'analytics', 'coupons'],
-      'manager': ['deals', 'products', 'analytics'],
-      'editor': ['deals', 'products'],
+      'super_admin': ['all', 'admin_management'],
+      'admin': ['deals', 'products', 'analytics', 'coupons', 'create_deals', 'update_deals', 'delete_deals'],
+      'manager': ['deals', 'products', 'analytics', 'create_deals', 'update_deals'],
+      'editor': ['deals', 'products', 'create_deals', 'update_deals'],
       'viewer': ['analytics']
     };
     
@@ -209,11 +244,51 @@ export const createAdminAccount = async (currentAdminId, adminData) => {
   }
 };
 
+/**
+ * Bootstrap default super admin (one-time)
+ */
+export const ensureSuperAdminExists = async () => {
+  const adminsSnap = await getDocs(query(collection(db, 'admins'), limit(1)));
+  if (!adminsSnap.empty) return true;
+
+  const secondaryApp = getSecondaryApp();
+  const secondaryAuth = getAuth(secondaryApp);
+  const secondaryDb = db;
+
+  const userCredential = await createUserWithEmailAndPassword(
+    secondaryAuth,
+    DEFAULT_SUPER_ADMIN.email,
+    DEFAULT_SUPER_ADMIN.password
+  );
+
+  await updateProfile(userCredential.user, {
+    displayName: DEFAULT_SUPER_ADMIN.profileName
+  });
+
+  await setDoc(doc(secondaryDb, 'admins', userCredential.user.uid), {
+    uid: userCredential.user.uid,
+    email: DEFAULT_SUPER_ADMIN.email,
+    username: DEFAULT_SUPER_ADMIN.username,
+    profileName: DEFAULT_SUPER_ADMIN.profileName,
+    mobile: '',
+    photoURL: userCredential.user.photoURL || '',
+    role: DEFAULT_SUPER_ADMIN.role,
+    status: DEFAULT_SUPER_ADMIN.status,
+    createdBy: 'system',
+    createdAt: serverTimestamp(),
+    passwordSet: true
+  });
+
+  await signOut(secondaryAuth);
+  return true;
+};
+
 export default {
   adminLogin,
   adminLogout,
   getCurrentAdmin,
   hasPermission,
   logAdminActivity,
-  createAdminAccount
+  createAdminAccount,
+  ensureSuperAdminExists
 };

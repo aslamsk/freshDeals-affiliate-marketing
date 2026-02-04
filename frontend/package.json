@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",
+    "@mdi/font": "^7.4.47",
     "@vueuse/core": "^10.7.0",
     "@vueuse/firebase": "^10.7.0",
     "axios": "^1.6.1",
@@ -18,7 +19,6 @@
     "uuid": "^13.0.0",
     "vite-plugin-pwa": "^1.2.0",
     "vue": "^3.3.4",
-    "vue-i18n": "^9.8.0",
     "vue-router": "^4.2.5",
     "vuetify": "^3.3.24"
   },

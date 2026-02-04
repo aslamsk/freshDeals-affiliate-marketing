@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <v-card class="category-browser" elevation="0" rounded="xl">
     <v-card-text class="pa-4 pa-md-6">
       <!-- Header -->
@@ -8,8 +8,8 @@
             <v-icon color="white" size="20">mdi-shape</v-icon>
           </div>
           <div>
-            <h2 class="text-h6 font-weight-bold text-grey-darken-3">Shop by Category</h2>
-            <p class="text-caption text-grey">Browse deals by your favorite categories</p>
+            <h2 class="text-h6 font-weight-bold category-title">Shop by Category</h2>
+            <p class="text-caption category-subtitle">Browse deals by your favorite categories</p>
           </div>
         </div>
         <v-btn
@@ -181,8 +181,17 @@ onMounted(() => {
 
 <style scoped>
 .category-browser {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: rgb(var(--v-theme-surface));
   border: 1px solid rgba(0, 0, 0, 0.05);
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.category-title {
+  color: rgb(var(--v-theme-on-surface));
+}
+
+.category-subtitle {
+  color: rgba(var(--v-theme-on-surface), 0.7);
 }
 
 .header-icon {
@@ -223,13 +232,19 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   padding: 16px 20px;
-  background: white;
+  background: linear-gradient(180deg, rgba(var(--v-theme-surface), 0.98) 0%, rgba(var(--v-theme-surface), 0.92) 100%);
   border-radius: 16px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
   min-width: 100px;
   position: relative;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.v-theme--dark .category-item {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.06);
 }
 
 .category-item:hover {
@@ -237,9 +252,13 @@ onMounted(() => {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
+.v-theme--dark .category-item:hover {
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
 .category-selected {
   border-color: #667eea;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  background: rgba(102, 126, 234, 0.12);
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
 
@@ -285,7 +304,7 @@ onMounted(() => {
 .category-name {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #1a1a2e;
+  color: rgb(var(--v-theme-on-surface));
   text-align: center;
 }
 

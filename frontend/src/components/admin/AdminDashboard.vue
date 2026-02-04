@@ -115,6 +115,10 @@
           bg-color="white"
           color="primary"
           slider-color="primary"
+          show-arrows
+          mobile-breakpoint="960"
+          align-tabs="start"
+          class="admin-tabs"
         >
           <v-tab value="products">
             <v-icon left>mdi-package-variant</v-icon>
@@ -139,6 +143,10 @@
           <v-tab value="notifications">
             <v-icon left>mdi-bell-ring</v-icon>
             Notifications
+          </v-tab>
+          <v-tab value="users">
+            <v-icon left>mdi-account-multiple</v-icon>
+            Admins
           </v-tab>
           <v-tab value="analytics">
             <v-icon left>mdi-chart-line</v-icon>
@@ -172,6 +180,10 @@
             <admin-notification-manager />
           </v-window-item>
 
+          <v-window-item value="users">
+            <admin-user-manager />
+          </v-window-item>
+
           <v-window-item value="analytics">
             <admin-analytics-viewer />
           </v-window-item>
@@ -189,6 +201,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import adminAuthService from '../../services/adminAuthService';
 import firebaseAdminService from '../../services/firebaseAdminService.js';
 import AdminProductManager from './AdminProductManager.vue';
 import AdminPlatformManager from './AdminPlatformManager.vue';
@@ -197,6 +210,7 @@ import AdminCouponManager from './AdminCouponManager.vue';
 import AdminSaaSManager from './AdminSaaSManager.vue';
 import AdminNotificationManager from './AdminNotificationManager.vue';
 import AdminAnalyticsViewer from './AdminAnalyticsViewer.vue';
+import AdminUserManager from './AdminUserManager.vue';
 
 const router = useRouter();
 const activeTab = ref('products');
@@ -227,9 +241,12 @@ const loadStats = async () => {
 };
 
 const logout = () => {
-  localStorage.removeItem('admin_token');
-  localStorage.removeItem('freshdeals_admin');
-  router.push('/admin/login');
+  adminAuthService.adminLogout().finally(() => {
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_user');
+    localStorage.removeItem('freshdeals_admin');
+    router.push('/admin/login');
+  });
 };
 
 onMounted(() => {
@@ -242,7 +259,8 @@ onMounted(() => {
 <style scoped>
 .admin-dashboard {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: rgb(var(--v-theme-background));
+  color: rgb(var(--v-theme-on-surface));
 }
 
 /* Beautiful Purple Gradient Header */
@@ -294,7 +312,7 @@ onMounted(() => {
 
 /* Stats Cards */
 .stat-card {
-  background: white;
+  background: rgb(var(--v-theme-surface));
   border-radius: 12px;
   transition: all 0.3s ease;
   overflow: hidden;
@@ -350,6 +368,15 @@ onMounted(() => {
   border-bottom: 1px solid #e0e0e0;
 }
 
+.admin-tabs {
+  overflow-x: auto;
+}
+
+.admin-tabs :deep(.v-tab) {
+  padding: 12px 16px;
+  min-width: 120px;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header-content {
@@ -371,6 +398,11 @@ onMounted(() => {
 
   .stat-value {
     font-size: 28px;
+  }
+
+  .admin-tabs :deep(.v-tab) {
+    padding: 10px 12px;
+    min-width: 100px;
   }
 }
 </style>

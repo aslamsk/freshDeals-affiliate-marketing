@@ -1,25 +1,40 @@
-/**
+﻿/**
  * SHARED FIREBASE CONFIGURATION
  * This is used by all services to ensure single app instance
  */
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration from environment variables
+const normalizeStorageBucket = (bucket) => {
+  if (!bucket) return bucket;
+  if (bucket.endsWith('.firebasestorage.app')) {
+    return bucket.replace('.firebasestorage.app', '.appspot.com');
+  }
+  return bucket;
+};
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'demo-key',
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'freshdeals-dev.firebaseapp.com',
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'freshdeals-dev',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'freshdeals-dev.appspot.com',
+  storageBucket: normalizeStorageBucket(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET) || 'freshdeals-dev.appspot.com',
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '123456789',
   appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:123456789:web:abc123',
 };
 
 // Initialize Firebase - single instance for entire app
+const getFirebaseApp = () => {
+  if (getApps().length > 0) {
+    return getApp();
+  }
+  return initializeApp(firebaseConfig);
+};
+
 let app, db;
 try {
-  app = initializeApp(firebaseConfig);
+  app = getFirebaseApp();
   db = getFirestore(app);
   console.log('✅ Firebase initialized successfully with project:', firebaseConfig.projectId);
 } catch (error) {
@@ -27,4 +42,4 @@ try {
 }
 
 // Export for use in all services
-export { app, db, firebaseConfig };
+export { app, db, firebaseConfig, getFirebaseApp };

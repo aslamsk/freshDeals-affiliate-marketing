@@ -21,13 +21,6 @@ import { setupFCM } from './services/notificationService';
 onMounted(async () => {
   // Setup service worker and PWA
   await setupFCM();
-
-  // Register service worker for offline support
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js').catch((err) => {
-      console.error('Service Worker registration failed:', err);
-    });
-  }
 });
 </script>
 

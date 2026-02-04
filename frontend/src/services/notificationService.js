@@ -34,7 +34,9 @@ export const sendNotification = (title, options = {}) => {
 export const setupFCM = async () => {
   if ('serviceWorker' in navigator) {
     try {
-      await navigator.serviceWorker.register('/service-worker.js');
+      await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+        scope: '/firebase-messaging/',
+      });
       console.log('Service Worker registered');
       return true;
     } catch (error) {

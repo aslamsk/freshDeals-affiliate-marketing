@@ -127,10 +127,8 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
 import firebaseAdminService from '../services/firebaseAdminService';
-
-const { t } = useI18n();
+import { t } from '../../utils/translate';
 
 const form = ref({
   title: '',

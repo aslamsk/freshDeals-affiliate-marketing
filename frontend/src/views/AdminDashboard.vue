@@ -330,7 +330,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 // Using mock auth for development - switch to adminAuthService when Firebase is configured
-import adminAuthService from '@/services/mockAuthService';
+import adminAuthService from '@/services/adminAuthService';
 import affiliateNetworkService from '@/services/affiliateNetworkService';
 // Use the REAL AdminDealManager from components/admin that connects to Firestore
 import AdminDealManager from '@/components/admin/AdminDealManager.vue';

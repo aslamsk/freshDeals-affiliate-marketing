@@ -17,8 +17,10 @@
     <v-navigation-drawer
       v-model="filterDrawer"
       location="end"
-      temporary
-      width="350"
+      :temporary="isMobile"
+      :permanent="!isMobile && filterDrawer"
+      :width="isMobile ? 320 : 360"
+      app
       class="filter-drawer"
     >
       <v-card flat class="fill-height d-flex flex-column">
@@ -178,12 +180,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useDisplay } from 'vuetify';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../services/firebaseConfig';
 
 const emit = defineEmits(['filters-changed']);
 
 const filterDrawer = ref(false);
+const { smAndDown } = useDisplay();
+const isMobile = computed(() => smAndDown.value);
 const categories = ref(['electronics', 'fashion', 'home', 'beauty', 'food', 'sports']);
 const platforms = ref(['Amazon', 'Flipkart', 'Myntra', 'Meesho', 'AJIO', 'Tata CLiQ']);
 const loading = ref(false);
@@ -379,6 +384,10 @@ onMounted(async () => {
 
 .filter-drawer {
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+}
+
+.filter-drawer :deep(.v-navigation-drawer__content) {
+  background: white;
 }
 
 .filter-section {

@@ -2,7 +2,7 @@
   <div class="dev-tools-container">
     <!-- Development Tools Button -->
     <v-fab
-      v-if="isDevelopment"
+      v-if="isAdminLoggedIn"
       icon="mdi-tools"
       location="bottom right"
       :offset="16"
@@ -12,7 +12,7 @@
 
     <!-- Dev Menu -->
     <v-card
-      v-if="showDevMenu && isDevelopment"
+      v-if="showDevMenu && isAdminLoggedIn"
       class="dev-menu"
       elevation="24"
     >
@@ -79,11 +79,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { seedFirestore } from '../utils/seedFirestore';
 import firebaseDealsService from '../services/firebaseDealsService';
+import adminAuthService from '../services/adminAuthService';
 
-const isDevelopment = computed(() => import.meta.env.DEV);
+const isAdminLoggedIn = ref(false);
 const showDevMenu = ref(false);
 const seeding = ref(false);
 const testing = ref(false);
@@ -195,13 +196,30 @@ const testPushNotification = async () => {
   }
 };
 
-onMounted(() => {
-  if (isDevelopment.value) {
-    addLog('🟢 Development mode enabled');
-    addLog('ℹ️ Dev tools available (orange fab button)');
+const refreshAdminState = async () => {
+  try {
+    const admin = await adminAuthService.getCurrentAdmin();
+    isAdminLoggedIn.value = !!admin;
+  } catch {
+    isAdminLoggedIn.value = false;
   }
+};
+
+const handleStorage = (event) => {
+  if (event.key === 'admin_token' || event.key === 'admin_user') {
+    refreshAdminState();
+  }
+};
+
+onMounted(() => {
+  refreshAdminState();
+  window.addEventListener('storage', handleStorage);
+  addLog('Dev tools available after admin login.');
 });
-</script>
+
+onUnmounted(() => {
+  window.removeEventListener('storage', handleStorage);
+});</script>
 
 <style scoped>
 .dev-tools-container {
@@ -239,3 +257,4 @@ onMounted(() => {
   }
 }
 </style>
+

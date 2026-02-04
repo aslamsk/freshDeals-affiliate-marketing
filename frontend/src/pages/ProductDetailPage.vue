@@ -92,7 +92,7 @@
                 <span class="text-h5">{{ $t('product.priceComparison') }}</span>
               </v-card-title>
               <v-card-text class="pa-0">
-                <v-table hover>
+                <v-table v-if="!isMobile" hover>
                   <thead>
                     <tr>
                       <th class="text-left font-weight-bold">{{ $t('product.platform') }}</th>
@@ -132,6 +132,42 @@
                     </tr>
                   </tbody>
                 </v-table>
+
+                <div v-else class="price-cards">
+                  <v-card
+                    v-for="price in comparison.prices"
+                    :key="price.platform"
+                    class="price-card"
+                    elevation="0"
+                  >
+                    <div class="price-card-header">
+                      <v-chip color="primary" variant="flat" size="small">
+                        {{ price.platform }}
+                      </v-chip>
+                      <span class="price-amount">₹{{ formatPrice(price.price) }}</span>
+                    </div>
+                    <div class="price-card-body">
+                      <v-chip :color="price.inStock ? 'success' : 'error'" size="small" variant="flat">
+                        <v-icon :icon="price.inStock ? 'mdi-check-circle' : 'mdi-close-circle'" start></v-icon>
+                        {{ price.inStock ? 'In Stock' : 'Out of Stock' }}
+                      </v-chip>
+                      <v-btn
+                        color="primary"
+                        size="large"
+                        variant="elevated"
+                        block
+                        :href="price.affiliateUrl || price.productUrl || '#'"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        @click="trackPlatformClick(price.platform)"
+                        prepend-icon="mdi-cart"
+                        class="mt-3"
+                      >
+                        {{ $t('common.buyNow') }}
+                      </v-btn>
+                    </div>
+                  </v-card>
+                </div>
               </v-card-text>
             </v-card>
           </v-col>
@@ -176,8 +212,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useDisplay } from 'vuetify';
 import { useDealsStore } from '../stores/dealsStore';
 import DealCard from '../components/DealCard.vue';
 
@@ -185,6 +222,8 @@ const route = useRoute();
 const dealsStore = useDealsStore();
 const comparison = ref(null);
 const loading = ref(false);
+const { smAndDown } = useDisplay();
+const isMobile = computed(() => smAndDown.value);
 
 const breadcrumbs = [
   { title: 'Home', to: '/', disabled: false },
@@ -225,5 +264,38 @@ onMounted(async () => {
 
 .price-row:hover {
   background-color: rgba(0, 0, 0, 0.02);
+}
+
+.price-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.price-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.price-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.price-amount {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+.price-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

@@ -49,9 +49,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
 const showForm = ref(false);
 const editingId = ref(null);
 const form = ref({

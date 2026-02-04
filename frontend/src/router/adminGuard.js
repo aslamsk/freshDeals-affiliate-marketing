@@ -3,8 +3,7 @@
  * Protects admin routes and checks permissions
  */
 
-// Using mock auth for development - switch to adminAuthService when Firebase is configured
-import adminAuthService from '@/services/mockAuthService';
+import adminAuthService from '@/services/adminAuthService';
 
 /**
  * Admin auth guard - redirects to login if not authenticated

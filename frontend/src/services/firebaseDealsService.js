@@ -438,3 +438,16 @@ export default {
   searchProducts,
   getProductsByCategory,
 };
+
+export const firebaseDealsService = {
+  getTodayDeals,
+  getDealsByCategory,
+  getAllProductsPublic,
+  getProductComparison,
+  getDealDetails,
+  trackDealClick,
+  listenToTodayDeals,
+  searchDeals,
+  searchProducts,
+  getProductsByCategory,
+};

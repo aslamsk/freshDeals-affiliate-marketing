@@ -87,8 +87,18 @@
       <v-card-text>
         <v-icon color="info" small>mdi-information</v-icon>
         <span class="ml-2 text-caption">
-          Demo: admin@freshdeals.com / password123
+          Default: admin.freshdeals@gmail.com / Temp$8282
         </span>
+        <v-btn
+          class="ml-2"
+          size="x-small"
+          variant="text"
+          color="primary"
+          :loading="isBootstrapping"
+          @click="bootstrapSuperAdmin"
+        >
+          Create Super Admin
+        </v-btn>
       </v-card-text>
     </v-card>
   </div>
@@ -98,7 +108,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 // Using mock auth for development - switch to adminAuthService when Firebase is configured
-import adminAuthService from '@/services/mockAuthService';
+import adminAuthService from '@/services/adminAuthService';
 
 const router = useRouter();
 
@@ -109,6 +119,7 @@ const showPassword = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref('');
 const isDevelopment = ref(import.meta.env.DEV);
+const isBootstrapping = ref(false);
 
 // Validation rules
 const emailRules = [
@@ -139,16 +150,9 @@ const handleLogin = async () => {
     const result = await adminAuthService.adminLogin(email.value, password.value);
 
     if (result.success) {
-      // Login successful
-      console.log('✅ Admin login successful:', result.admin.name);
-
-      // Store admin data in localStorage (auth service handles this)
-      localStorage.setItem('admin_token', result.token);
-
-      // Redirect to admin dashboard
+      console.log('✅ Admin login successful:', result.admin.profileName || result.admin.name || result.admin.email);
       await router.push('/admin/dashboard');
     } else {
-      // Login failed
       errorMessage.value = result.error || 'Login failed. Please try again.';
     }
   } catch (error) {
@@ -176,6 +180,11 @@ const handleLogin = async () => {
  */
 onMounted(async () => {
   try {
+    await adminAuthService.ensureSuperAdminExists();
+  } catch (error) {
+    console.warn('Super admin bootstrap skipped:', error?.message || error);
+  }
+  try {
     const currentAdmin = await adminAuthService.getCurrentAdmin();
     if (currentAdmin) {
       // Already logged in, redirect to dashboard
@@ -186,6 +195,18 @@ onMounted(async () => {
     console.log('Not logged in, showing login page');
   }
 });
+
+const bootstrapSuperAdmin = async () => {
+  errorMessage.value = '';
+  isBootstrapping.value = true;
+  try {
+    await adminAuthService.ensureSuperAdminExists();
+  } catch (error) {
+    errorMessage.value = error?.message || 'Failed to create super admin';
+  } finally {
+    isBootstrapping.value = false;
+  }
+};
 </script>
 
 <style scoped>
